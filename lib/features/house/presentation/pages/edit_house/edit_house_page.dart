@@ -36,7 +36,6 @@ class _EditHousePageState extends State<EditHousePage> {
   final _bedroomCountController = TextEditingController();
   final _bathroomCountController = TextEditingController();
   final _electricityCapacityController = TextEditingController();
-  final _createdByController = TextEditingController();
 
   // Boolean values
   bool _isSHM = false;
@@ -121,7 +120,6 @@ class _EditHousePageState extends State<EditHousePage> {
         widget.houseData.bathroomCount?.toInt().toString() ?? '';
     _electricityCapacityController.text =
         widget.houseData.electricityCapacity?.toInt().toString() ?? '';
-    _createdByController.text = widget.houseData.createdBy;
 
     // Set boolean values
     _isSHM = widget.houseData.isSHM ?? false;
@@ -203,7 +201,6 @@ class _EditHousePageState extends State<EditHousePage> {
       "bedroom_count": toDouble(_bedroomCountController.text),
       "bathroom_count": toDouble(_bathroomCountController.text),
       "electricity_capacity": toDouble(_electricityCapacityController.text),
-      "created_by": _createdByController.text,
       "contacts": _contacts
           .map(
             (c) => {
@@ -308,7 +305,6 @@ class _EditHousePageState extends State<EditHousePage> {
     _bedroomCountController.dispose();
     _bathroomCountController.dispose();
     _electricityCapacityController.dispose();
-    _createdByController.dispose();
     _scrollController.dispose();
 
     // Dispose contact controllers
@@ -552,7 +548,7 @@ class _EditHousePageState extends State<EditHousePage> {
                 ),
                 _buildTextFormField(
                   controller: _streetRowWidthController,
-                  label: 'Street Width (m)',
+                  label: 'Street Width (car)',
                   hint: 'e.g., 6.0',
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                 ),
@@ -702,14 +698,6 @@ class _EditHousePageState extends State<EditHousePage> {
                 ),
 
                 const SizedBox(height: 24),
-
-                // Created By (Read-only)
-                _buildSectionTitle('Listing Information'),
-                _buildTextFormField(
-                  controller: _createdByController,
-                  label: 'Created By',
-                  hint: 'Enter creator name',
-                ),
 
                 const SizedBox(height: 32),
 
