@@ -58,14 +58,13 @@ class HouseDetailContent extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.share),
+              icon: const Icon(Icons.delete),
+              tooltip: 'Delete',
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Share feature coming soon'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
+                // delegate the call to parent state
+                final state = context
+                    .findAncestorStateOfType<_HouseDetailPageState>();
+                state?._deleteHouse(context);
               },
             ),
           ],
@@ -560,6 +559,54 @@ class _HouseDetailPageState extends State<HouseDetailPage> {
       return HouseDataResponse.fromJson(data);
     } else {
       return null;
+    }
+  }
+
+  Future<void> _deleteHouse(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Deletion'),
+        content: const Text('Are you sure you want to delete this house?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final url = Uri.parse(
+        '${Config.apiBaseUrl}/api/house-data/${widget.houseId}',
+      );
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('House deleted successfully.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context); // Go back to previous screen
+        }
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to delete house: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
