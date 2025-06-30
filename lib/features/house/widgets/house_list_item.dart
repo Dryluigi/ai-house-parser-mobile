@@ -4,9 +4,14 @@ import 'package:house_parser_mobile/features/house/data/dtos/house_data_response
 import 'package:house_parser_mobile/features/house/presentation/pages/house_detail/house_detail_page.dart';
 
 class HouseListItem extends StatelessWidget {
+  final Function() refreshList;
   final HouseDataResponse data;
 
-  const HouseListItem({super.key, required this.data});
+  const HouseListItem({
+    super.key,
+    required this.data,
+    required this.refreshList,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +22,7 @@ class HouseListItem extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => HouseDetailPage(houseId: data.id),
           ),
-        );
+        ).then((value) => refreshList());
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),

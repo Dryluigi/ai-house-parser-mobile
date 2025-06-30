@@ -66,7 +66,7 @@ class HouseListPageState extends State<HouseListPage>
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const CreateHouseManualPage()),
-    );
+    ).then((value) => {_fetchHouseData()});
   }
 
   Future<Position> _getCurrentLocation() async {
@@ -166,7 +166,10 @@ class HouseListPageState extends State<HouseListPage>
             padding: const EdgeInsets.all(8.0),
             itemBuilder: (context, index) {
               final item = houseData[index];
-              return HouseListItem(data: HouseDataResponse.fromJson(item));
+              return HouseListItem(
+                data: HouseDataResponse.fromJson(item),
+                refreshList: _fetchHouseData,
+              );
             },
           ),
         ),
