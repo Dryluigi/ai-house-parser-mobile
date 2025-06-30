@@ -18,6 +18,9 @@ class CreateHouseManualPage extends StatefulWidget {
 
 class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
   File? _selectedImage;
+
+  bool _isLoading = false;
+
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
@@ -119,10 +122,15 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isLoading = true);
+
     String? imageKey;
     if (_selectedImage != null) {
       imageKey = await _uploadImage(_selectedImage!);
-      if (imageKey == null) return; // upload failed
+      if (imageKey == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
     }
 
     double? toDouble(String text) =>
@@ -167,6 +175,8 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
       headers: {'Content-Type': 'application/json'},
       body: json.encode(requestBody),
     );
+
+    setState(() => _isLoading = false);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -241,7 +251,6 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
   @override
   void initState() {
     super.initState();
-    _addContact(); // Add initial contact
   }
 
   @override
@@ -282,7 +291,7 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
   }
 
   void _removeContact(int index) {
-    if (_contacts.length > 1) {
+    if (_contacts.isNotEmpty) {
       setState(() {
         _contacts[index]['name']?.dispose();
         _contacts[index]['phone']?.dispose();
@@ -291,19 +300,6 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
       });
     }
   }
-
-  // void _submitForm() {
-  //   if (_formKey.currentState!.validate()) {
-  //     // TODO: Implement form submission to API
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('House data saved successfully!'),
-  //         backgroundColor: Colors.green,
-  //       ),
-  //     );
-  //     Navigator.pop(context);
-  //   }
-  // }
 
   Future<void> _fetchCurrentLocation() async {
     bool serviceEnabled;
@@ -622,14 +618,13 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (_contacts.length > 1)
-                                IconButton(
-                                  onPressed: () => _removeContact(index),
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
+                              IconButton(
+                                onPressed: () => _removeContact(index),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
                                 ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -673,18 +668,27 @@ class _CreateHouseManualPageState extends State<CreateHouseManualPage> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _submitForm,
+                    onPressed: _isLoading ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text(
-                      'Save House Data',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Save House Data',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 

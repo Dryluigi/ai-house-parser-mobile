@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:house_parser_mobile/constants/config.dart';
 import 'package:house_parser_mobile/features/house/data/dtos/house_data_response.dart';
 import 'package:exif/exif.dart';
@@ -20,6 +21,7 @@ class EditHousePage extends StatefulWidget {
 
 class _EditHousePageState extends State<EditHousePage> {
   File? _selectedImage;
+  bool _isSubmitting = false;
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
 
@@ -170,10 +172,15 @@ class _EditHousePageState extends State<EditHousePage> {
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
 
+    setState(() => _isSubmitting = true);
+
     String? imageKey = widget.houseData.mainImageKey;
     if (_selectedImage != null) {
       imageKey = await _uploadImage(_selectedImage!);
-      if (imageKey == null) return; // upload failed
+      if (imageKey == null) {
+        setState(() => _isSubmitting = false);
+        return;
+      }
     }
 
     double? toDouble(String text) =>
@@ -221,6 +228,8 @@ class _EditHousePageState extends State<EditHousePage> {
       body: json.encode(requestBody),
     );
 
+    setState(() => _isSubmitting = false);
+
     if (response.statusCode == 200 || response.statusCode == 201) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -228,7 +237,7 @@ class _EditHousePageState extends State<EditHousePage> {
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context, true); // Return true to indicate data was updated
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -328,7 +337,7 @@ class _EditHousePageState extends State<EditHousePage> {
   }
 
   void _removeContact(int index) {
-    if (_contacts.length > 1) {
+    if (_contacts.isNotEmpty) {
       setState(() {
         _contacts[index]['name']?.dispose();
         _contacts[index]['phone']?.dispose();
@@ -655,14 +664,13 @@ class _EditHousePageState extends State<EditHousePage> {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (_contacts.length > 1)
-                                IconButton(
-                                  onPressed: () => _removeContact(index),
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
+                              IconButton(
+                                onPressed: () => _removeContact(index),
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
                                 ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -706,18 +714,27 @@ class _EditHousePageState extends State<EditHousePage> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _submitForm,
+                    onPressed: _isSubmitting ? null : _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text(
-                      'Update House Data',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Update House Data',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -800,12 +817,12 @@ class _EditHousePageState extends State<EditHousePage> {
                 : widget.houseData.mainImageKey != null
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      widget.houseData.getImageUrl(),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.houseData.getImageUrl(),
                       width: 180,
                       height: 180,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
+                      errorWidget: (context, error, stackTrace) {
                         return Container(
                           width: 180,
                           height: 180,
