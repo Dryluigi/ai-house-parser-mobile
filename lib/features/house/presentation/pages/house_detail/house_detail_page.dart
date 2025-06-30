@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:house_parser_mobile/constants/config.dart';
 import 'package:house_parser_mobile/features/house/widgets/contact_information_card.dart';

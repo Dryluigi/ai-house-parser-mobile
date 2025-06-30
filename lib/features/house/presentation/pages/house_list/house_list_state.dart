@@ -1,5 +1,3 @@
-// import 'dart:io';
-
 import 'dart:convert';
 import 'package:house_parser_mobile/constants/config.dart';
 import 'package:house_parser_mobile/features/house/data/dtos/house_data_response.dart';
@@ -8,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'package:house_parser_mobile/features/house/data/dummies/house_data_response_dummies.dart';
 import 'package:house_parser_mobile/features/house/presentation/pages/create_house_manual/create_house_manual_page.dart';
 import 'package:house_parser_mobile/features/house/presentation/pages/house_list/house_list_page.dart';
 import 'package:house_parser_mobile/features/house/widgets/house_list_item.dart';
